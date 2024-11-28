@@ -1,9 +1,22 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { toggleSidebar } from "../utils/appSlice";
+import { YOUTUBE_SEARCH_API } from "../utils/constants";
 
 const Head = () => {
   const dispatch = useDispatch();
+  const [searchQuery, setSearchQuery] = useState("");
+  useEffect(() => {
+    const getSearchSuggestions = async () => {
+      const data = await fetch(YOUTUBE_SEARCH_API + searchQuery);
+      const json = await data.json();
+    };
+    const timer = setTimeout(() => getSearchSuggestions(), 200);
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [searchQuery]);
+
   return (
     <div className="grid grid-flow-col p-2 m-2 shadow-lg">
       <div className="flex col-span-1">
@@ -25,6 +38,7 @@ const Head = () => {
         <input
           className="w-5/12 border border-gray-400 rounded-l-full p-2"
           type="text"
+          onChange={(e) => setSearchQuery(e.target.value)}
         />
         <button className="border border-gray-400 rounded-r-full py-2 px-5 bg-gray-200">
           🔍

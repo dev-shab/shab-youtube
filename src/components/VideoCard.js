@@ -15,4 +15,12 @@ const VideoCard = ({ info }) => {
   );
 };
 
+export const BorderedCard = ({ info }) => {
+  return (
+    <div className="border border-black-900">
+      <VideoCard info={info} />
+    </div>
+  );
+};
+
 export default VideoCard;
