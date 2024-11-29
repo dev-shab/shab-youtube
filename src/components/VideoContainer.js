@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import { YOUTUBE_MOVIES_API } from "../utils/constants";
 import VideoCard, { BorderedCard } from "./VideoCard";
 import { Link } from "react-router-dom";
@@ -21,9 +21,11 @@ const VideoContainer = () => {
       {videos.length && <BorderedCard info={videos[0]} />}
       {videos.map((video) => {
         return (
-          <Link to={`/watch?v=${video.id}`}>
-            <VideoCard key={video.id} info={video} />
-          </Link>
+          <Fragment key={video.id}>
+            <Link to={`/watch?v=${video.id}`}>
+              <VideoCard info={video} />
+            </Link>
+          </Fragment>
         );
       })}
     </div>

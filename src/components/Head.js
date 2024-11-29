@@ -1,21 +1,42 @@
 import React, { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { toggleSidebar } from "../utils/appSlice";
-import { YOUTUBE_SEARCH_API } from "../utils/constants";
+import { YOUTUBE_SUGGESTIONS_API } from "../utils/constants";
+import { cacheResults } from "../utils/searchSlice";
 
 const Head = () => {
   const dispatch = useDispatch();
   const [searchQuery, setSearchQuery] = useState("");
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const searchCache = useSelector((store) => store.search);
   useEffect(() => {
     const getSearchSuggestions = async () => {
-      const data = await fetch(YOUTUBE_SEARCH_API + searchQuery);
-      const json = await data.json();
+      const data = await fetch(YOUTUBE_SUGGESTIONS_API + searchQuery);
+      const text = await data.text();
+      const searchSuggestions = [];
+      text.split("[").forEach((ele, index) => {
+        if (!ele.split('"')[1] || index === 1) return;
+        return searchSuggestions.push(ele.split('"')[1]);
+      });
+      dispatch(
+        cacheResults({
+          [searchQuery]: searchSuggestions,
+        })
+      );
+      setSuggestions(searchSuggestions);
     };
-    const timer = setTimeout(() => getSearchSuggestions(), 200);
+    const timer = setTimeout(() => {
+      if (searchCache[searchQuery]) {
+        setSuggestions(searchCache[searchQuery]);
+      } else {
+        getSearchSuggestions();
+      }
+    }, 200);
     return () => {
       clearTimeout(timer);
     };
-  }, [searchQuery]);
+  }, [dispatch, searchCache, searchQuery]);
 
   return (
     <div className="grid grid-flow-col p-2 m-2 shadow-lg">
@@ -34,15 +55,33 @@ const Head = () => {
           />
         </a>
       </div>
-      <div className="col-span-10 text-center">
-        <input
-          className="w-5/12 border border-gray-400 rounded-l-full p-2"
-          type="text"
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
-        <button className="border border-gray-400 rounded-r-full py-2 px-5 bg-gray-200">
-          🔍
-        </button>
+      <div className="col-span-10">
+        <div>
+          <input
+            className="px-5 w-5/12 border border-gray-400 rounded-l-full p-2"
+            type="text"
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onFocus={() => setShowSuggestions(true)}
+            onBlur={() => setShowSuggestions(false)}
+          />
+          <button className="border border-gray-400 rounded-r-full py-2 px-5 bg-gray-200">
+            🔍
+          </button>
+        </div>
+        {showSuggestions && searchQuery && (
+          <div className="absolute bg-white py-2 px-5 w-[774px] rounded-lg">
+            <ul>
+              {suggestions.map((suggestion) => (
+                <li
+                  key={suggestion}
+                  className="py-2 px-3 shadow-sm border-gray-100 hover:bg-gray-100"
+                >
+                  🔍 {suggestion}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
       <div className="col-span-1 flex justify-end">
         <img
