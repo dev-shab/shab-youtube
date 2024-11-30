@@ -4,3 +4,5 @@ export const YOUTUBE_MOVIES_API =
 
 export const YOUTUBE_SUGGESTIONS_API =
   "https://clients1.google.com/complete/search?client=youtube&gs_ri=youtube&ds=yt&q=";
+
+export const OFFSET_LIVE_CHAT = 100;
